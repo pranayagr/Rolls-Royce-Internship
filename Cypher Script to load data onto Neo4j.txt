@@ -1,0 +1,29 @@
+// Loading the csv file
+LOAD CSV WITH HEADERS FROM 'file:///data.csv' as line
+with line limit 1
+
+// Creating nodes of concepts identified in annotation/NER
+merge (c:Cause {cause: line.Cause})
+merge (a:Accident {type: line.typeOfaccident})
+merge (d:Date {date: line.Date})
+merge (t:Time {time: line.Time})
+merge (l:Location {location: line.Country})
+merge (doc:Documentation {document: line.Documentation})
+merge (agent:Agent {agent: line.agent})
+merge (equip:Equipment {equipment: line.Equipment})
+merge (eqSt:EquipmentState {eqState: line.equipmentState})
+merge (op:Operator {operator: line.operator})
+merge (ex:ExternalFactor {extFac: line.ExternalFactor})
+
+// Establishing all the relationships b/w the nodes according to the Ontology developed
+merge (a)<-[type:INSTANCE]-(c)
+merge (a)-[:OCCURED_ON]->(d)
+merge (d)-[:TIMESTAMP]->(t)
+merge (a)-[:LOCATION]->(l)
+merge (a)-[:EQUIPMENT_INVOLVED]->(equip)
+merge (equip)-[:OPERATED_BY]->(op)
+merge (equip)-[:CURRENT_STATE]->(eqSt)
+merge (equip)-[:AGENTS_INVOLVED]->(agent)
+merge (a)-[:ACTION_REQD]->(doc)
+merge (agent)-[:WORK_ON]->(doc)
+merge (c)-[:FACTORS_ASSOCIATED]->(ex)
